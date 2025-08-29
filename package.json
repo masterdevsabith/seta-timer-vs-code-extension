@@ -12,10 +12,12 @@
   "activationEvents": [],
   "main": "./extension.js",
   "contributes": {
-    "commands": [{
-      "command": "seta-timer.helloWorld",
-      "title": "Hello World"
-    }]
+    "commands": [
+      {
+        "command": "seta-timer.SetaProductivityTimer",
+        "title": "Seta productivity timer"
+      }
+    ]
   },
   "scripts": {
     "lint": "eslint .",
