@@ -84,7 +84,6 @@ function activate(context) {
 
       let work_minutes = method.method.work;
       let break_minutes = method.method.break;
-      vscode.window.showInformationMessage("Hello World from seta-timer!");
 
       startTimer(
         work_minutes,
@@ -110,12 +109,39 @@ function startTimer(workmin, breakmin, title, statusBarItem) {
 
     if (seconds <= 0) {
       clearInterval(interval);
-      statusBarItem.text = `$(clock) ${title} Done!`;
+      vscode.window.showInformationMessage(
+        `${title} finished! Take a break for ${breakmin} minutes.`
+      );
+
+      if (breakmin > 0) {
+        startBreakTimer(workmin, breakmin, title, statusBarItem);
+      } else {
+        statusBarItem.hide();
+      }
     }
     seconds--;
   }, 1000);
 }
-// This method is called when your extension is deactivated
+
+function startBreakTimer(workmin, breakmin, title, statusBarItem) {
+  let seconds = breakmin * 60;
+  statusBarItem.show();
+  console.log(`${title} BREAK has started, with ${breakmin} minutes`);
+
+  const break_interval = setInterval(() => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    statusBarItem.text = `$(clock) ${title} break : ${mins}m ${secs}s`;
+
+    if (seconds <= 0) {
+      clearInterval(break_interval);
+      statusBarItem.text = `$(clock) ${title} break Finished!`;
+      vscode.window.showInformationMessage(`Break over! Back to work.`);
+    }
+    seconds--;
+  }, 1000);
+}
+
 function deactivate() {}
 
 module.exports = {
