@@ -67,7 +67,7 @@ function activate(context) {
   statusBarItem.command = "seta-timer.SetaProductivityTimer";
   context.subscriptions.push(statusBarItem);
 
-  const disposable = vscode.commands.registerCommand(
+  const start_disposable = vscode.commands.registerCommand(
     "seta-timer.SetaProductivityTimer",
     async function () {
       const method = await vscode.window.showQuickPick(
@@ -77,45 +77,58 @@ function activate(context) {
           placeHolder: "Choose a productivity method",
         }
       );
+      let work_minutes = method.method.work;
+      let break_minutes = method.method.break;
+      let title = method.method.title;
 
       if (!method) return;
 
-      const commandHandler = () => {
-        isRunning = false;
-      };
-      let work_minutes = method.method.work;
-      let break_minutes = method.method.break;
-
-      startTimer(
-        work_minutes,
-        break_minutes,
-        method.method.title,
-        statusBarItem
-      );
+      isRunning = true;
+      startTimer(work_minutes, break_minutes, title, statusBarItem);
     }
   );
 
-  context.subscriptions.push(disposable);
+  const stop_disposable = vscode.commands.registerCommand(
+    "seta-timer.StopProductivityTimer",
+    function () {
+      isRunning = false;
+      if (currentInterval) {
+        clearInterval(currentInterval);
+        currentInterval = null;
+      }
+      vscode.window.showInformationMessage("Productivity timer stopped.");
+      statusBarItem.hide();
+    }
+  );
+
+  context.subscriptions.push(start_disposable, stop_disposable);
 }
 
 function startTimer(workmin, breakmin, title, statusBarItem) {
   let seconds = workmin * 60;
   statusBarItem.show();
-  console.log(`${title} technique has started, with ${workmin} minutes`);
 
-  const interval = setInterval(() => {
+  if (currentInterval) clearInterval(currentInterval);
+
+  currentInterval = setInterval(() => {
+    if (!isRunning) {
+      clearInterval(currentInterval);
+      return;
+    }
+
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     statusBarItem.color = "#f6ff00ff";
     statusBarItem.text = `$(clock) ${title}: ${mins}m ${secs}s`;
 
     if (seconds <= 0) {
-      clearInterval(interval);
+      clearInterval(currentInterval);
+
       vscode.window.showInformationMessage(
         `${title} finished! Take a break for ${breakmin} minutes.`
       );
 
-      if (breakmin > 0 && isRunning) {
+      if (isRunning) {
         startBreakTimer(workmin, breakmin, title, statusBarItem);
       } else {
         statusBarItem.hide();
@@ -128,20 +141,26 @@ function startTimer(workmin, breakmin, title, statusBarItem) {
 function startBreakTimer(workmin, breakmin, title, statusBarItem) {
   let seconds = breakmin * 60;
   statusBarItem.show();
-  console.log(`${title} BREAK has started, with ${breakmin} minutes`);
 
-  const break_interval = setInterval(() => {
+  if (currentInterval) clearInterval(currentInterval);
+
+  currentInterval = setInterval(() => {
+    if (!isRunning) {
+      clearInterval(currentInterval);
+      return;
+    }
+
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     statusBarItem.color = "#1eff00ff";
     statusBarItem.text = `$(clock) ${title} break : ${mins}m ${secs}s`;
 
     if (seconds <= 0) {
-      clearInterval(break_interval);
+      clearInterval(currentInterval);
       statusBarItem.text = `$(clock) ${title} break Finished!`;
       vscode.window.showInformationMessage(`Break over! Back to work.`);
 
-      if (workmin > 0 && isRunning) {
+      if (isRunning) {
         startTimer(workmin, breakmin, title, statusBarItem);
       } else {
         statusBarItem.hide();
