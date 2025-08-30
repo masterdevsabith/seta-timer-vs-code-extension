@@ -16,6 +16,10 @@
       {
         "command": "seta-timer.SetaProductivityTimer",
         "title": "Seta productivity timer"
+      },
+      {
+        "command": "seta-timer.StopProductivityTimer",
+        "title": "Stop Seta productivity timer"
       }
     ]
   },

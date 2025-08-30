@@ -3,6 +3,10 @@ const vscode = require("vscode");
 /**
  * @param {vscode.ExtensionContext} context
  */
+
+let isRunning = false;
+let currentInterval = null;
+
 function activate(context) {
   const productivity_methods = [
     {
@@ -60,14 +64,8 @@ function activate(context) {
     vscode.StatusBarAlignment.Right,
     100
   );
-
-  //intialising status bar
   statusBarItem.command = "seta-timer.SetaProductivityTimer";
   context.subscriptions.push(statusBarItem);
-
-  //testing status bar
-  //   statusBarItem.text = "$(zap) Testing Seta-Timer";
-  //   statusBarItem.show();
 
   const disposable = vscode.commands.registerCommand(
     "seta-timer.SetaProductivityTimer",
@@ -82,6 +80,9 @@ function activate(context) {
 
       if (!method) return;
 
+      const commandHandler = () => {
+        isRunning = false;
+      };
       let work_minutes = method.method.work;
       let break_minutes = method.method.break;
 
@@ -105,6 +106,7 @@ function startTimer(workmin, breakmin, title, statusBarItem) {
   const interval = setInterval(() => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
+    statusBarItem.color = "#f6ff00ff";
     statusBarItem.text = `$(clock) ${title}: ${mins}m ${secs}s`;
 
     if (seconds <= 0) {
@@ -113,7 +115,7 @@ function startTimer(workmin, breakmin, title, statusBarItem) {
         `${title} finished! Take a break for ${breakmin} minutes.`
       );
 
-      if (breakmin > 0) {
+      if (breakmin > 0 && isRunning) {
         startBreakTimer(workmin, breakmin, title, statusBarItem);
       } else {
         statusBarItem.hide();
@@ -131,13 +133,21 @@ function startBreakTimer(workmin, breakmin, title, statusBarItem) {
   const break_interval = setInterval(() => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
+    statusBarItem.color = "#1eff00ff";
     statusBarItem.text = `$(clock) ${title} break : ${mins}m ${secs}s`;
 
     if (seconds <= 0) {
       clearInterval(break_interval);
       statusBarItem.text = `$(clock) ${title} break Finished!`;
       vscode.window.showInformationMessage(`Break over! Back to work.`);
+
+      if (workmin > 0 && isRunning) {
+        startTimer(workmin, breakmin, title, statusBarItem);
+      } else {
+        statusBarItem.hide();
+      }
     }
+
     seconds--;
   }, 1000);
 }
