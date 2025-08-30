@@ -37,20 +37,20 @@ function activate(context) {
       work: 90,
       break: 20,
     },
-    {
-      id: "test-timer",
-      title: "Test Timer",
-      description: "Test timer with 1 min work + 1 min break",
-      work: 1,
-      break: 1,
-    },
-    {
-      id: "custom",
-      title: "Custom Timer",
-      description: "Set your own work and break durations",
-      work: null,
-      break: null,
-    },
+    // {
+    //   id: "test-timer",
+    //   title: "Test Timer",
+    //   description: "Test timer with 1 min work + 1 min break",
+    //   work: 1,
+    //   break: 1,
+    // },
+    // {
+    //   id: "custom",
+    //   title: "Custom Timer",
+    //   description: "Set your own work and break durations",
+    //   work: null,
+    //   break: null,
+    // },
   ];
   const mapped_productivity_method = productivity_methods.map((method) => {
     return {
@@ -91,6 +91,10 @@ function activate(context) {
   const stop_disposable = vscode.commands.registerCommand(
     "seta-timer.StopProductivityTimer",
     function () {
+      if (isRunning === false) {
+        vscode.window.showInformationMessage("No timer is running.");
+        return;
+      }
       isRunning = false;
       if (currentInterval) {
         clearInterval(currentInterval);
