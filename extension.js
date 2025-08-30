@@ -37,20 +37,13 @@ function activate(context) {
       work: 90,
       break: 20,
     },
-    // {
-    //   id: "test-timer",
-    //   title: "Test Timer",
-    //   description: "Test timer with 1 min work + 1 min break",
-    //   work: 1,
-    //   break: 1,
-    // },
-    // {
-    //   id: "custom",
-    //   title: "Custom Timer",
-    //   description: "Set your own work and break durations",
-    //   work: null,
-    //   break: null,
-    // },
+    {
+      id: "custom",
+      title: "Custom Timer",
+      description: "Set your own work and break durations",
+      work: null,
+      break: null,
+    },
   ];
   const mapped_productivity_method = productivity_methods.map((method) => {
     return {
@@ -82,6 +75,21 @@ function activate(context) {
       let title = method.method.title;
 
       if (!method) return;
+
+      if (method.method.id === "custom") {
+        const workInput = await vscode.window.showInputBox({
+          prompt: "Enter work duration in minutes",
+          validateInput: (val) =>
+            isNaN(val) || parseInt(val) <= 0 ? "Enter a valid number" : null,
+        });
+        const breakInput = await vscode.window.showInputBox({
+          prompt: "Enter break duration in minutes",
+          validateInput: (val) =>
+            isNaN(val) || parseInt(val) <= 0 ? "Enter a valid number" : null,
+        });
+        work_minutes = parseInt(workInput);
+        break_minutes = parseInt(breakInput);
+      }
 
       isRunning = true;
       startTimer(work_minutes, break_minutes, title, statusBarItem);
