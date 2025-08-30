@@ -1,6 +1,7 @@
 {
   "name": "seta-timer",
   "displayName": "seta-timer",
+  "publisher": "MuhammedSabithAS",
   "description": "a productivity timer for programmers",
   "version": "0.0.1",
   "engines": {
