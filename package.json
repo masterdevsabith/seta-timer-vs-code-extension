@@ -3,7 +3,7 @@
   "displayName": "seta-timer",
   "publisher": "MuhammedSabithAS",
   "description": "a productivity timer for programmers",
-  "version": "0.0.1",
+  "version": "1.1.0",
   "engines": {
     "vscode": "^1.103.0"
   },
